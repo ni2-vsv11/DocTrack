@@ -92,3 +92,5 @@ LOGOUT_REDIRECT_URL = 'login'
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+CSRF_TRUSTED_ORIGINS = ['https://*.replit.dev', 'https://*.replit.app', 'http://localhost:5000', 'http://127.0.0.1:5000']

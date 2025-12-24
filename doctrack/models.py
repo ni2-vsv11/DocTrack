@@ -31,6 +31,12 @@ class UserProfile(models.Model):
     
     def can_upload_document(self):
         return self.role in ['admin', 'manager', 'reviewer', 'contributor']
+    
+    def can_manage_users(self):
+        return self.role == 'admin'
+    
+    def can_manage_statuses(self):
+        return self.role in ['admin', 'manager', 'reviewer']
 
 
 class Team(models.Model):
@@ -101,9 +107,17 @@ class Document(models.Model):
         ('other', 'Other'),
     ]
     
+    STATUS_CHOICES = [
+        ('uploaded', 'Uploaded'),
+        ('in_review', 'In Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
     name = models.CharField(max_length=255)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='documents')
     file_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='other')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='uploaded')
     description = models.TextField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_documents')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -117,6 +131,15 @@ class Document(models.Model):
     
     def get_version_count(self):
         return self.versions.count()
+    
+    def get_status_badge_color(self):
+        colors = {
+            'uploaded': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+            'in_review': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+            'approved': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+            'rejected': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        }
+        return colors.get(self.status, 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100')
 
 
 def version_upload_path(instance, filename):

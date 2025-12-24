@@ -4,55 +4,55 @@
 
 {% block content %}
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user.first_name|default:user.username }}!</h1>
-    <p class="text-gray-600 mt-1">Here's what's happening with your documents</p>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, {{ user.first_name|default:user.username }}!</h1>
+    <p class="text-gray-600 dark:text-gray-400 mt-1">Here's what's happening with your documents</p>
 </div>
 
 <div class="grid md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-gray-900/50 transition">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-sm">Total Projects</p>
-                <p class="text-3xl font-bold text-gray-900">{{ stats.total_projects }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Total Projects</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.total_projects }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-folder text-blue-600 text-xl"></i>
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-folder text-blue-600 dark:text-blue-400 text-xl"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-gray-900/50 transition">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-sm">Open Pull Requests</p>
-                <p class="text-3xl font-bold text-gray-900">{{ stats.open_prs }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Open Pull Requests</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.open_prs }}</p>
             </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-code-pull-request text-yellow-600 text-xl"></i>
+            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-code-pull-request text-yellow-600 dark:text-yellow-400 text-xl"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-gray-900/50 transition">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-sm">Pending Reviews</p>
-                <p class="text-3xl font-bold text-gray-900">{{ stats.pending_reviews }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Pending Reviews</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.pending_reviews }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-eye text-purple-600 text-xl"></i>
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-eye text-purple-600 dark:text-purple-400 text-xl"></i>
             </div>
         </div>
     </div>
     
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-gray-900/50 transition">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-gray-500 text-sm">My Tasks</p>
-                <p class="text-3xl font-bold text-gray-900">{{ stats.my_tasks }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">My Tasks</p>
+                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.my_tasks }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-tasks text-green-600 text-xl"></i>
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <i class="fas fa-tasks text-green-600 dark:text-green-400 text-xl"></i>
             </div>
         </div>
     </div>
