@@ -47,8 +47,8 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition">
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition">
+<body class="bg-gray-50 dark:bg-zinc-950 min-h-screen transition">
+    <nav class="bg-white dark:bg-zinc-900 shadow-sm border-b border-gray-200 dark:border-zinc-800 transition">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -58,26 +58,26 @@
                     </a>
                     {% if user.is_authenticated %}
                     <div class="hidden md:flex ml-10 space-x-4">
-                        <a href="{% url 'dashboard' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                        <a href="{% url 'dashboard' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fas fa-home mr-1"></i> Dashboard
                         </a>
-                        <a href="{% url 'project_list' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                        <a href="{% url 'project_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fas fa-folder mr-1"></i> Projects
                         </a>
-                        <a href="{% url 'pull_request_list' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                        <a href="{% url 'pull_request_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fas fa-code-pull-request mr-1"></i> Reviews
                         </a>
-                        <a href="{% url 'work_item_list' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                        <a href="{% url 'work_item_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fas fa-tasks mr-1"></i> Tasks
                         </a>
-                        <a href="{% url 'team_list' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                        <a href="{% url 'team_list' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fas fa-users mr-1"></i> Teams
                         </a>
                     </div>
                     {% endif %}
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="theme-toggle" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <button id="theme-toggle" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white focus:outline-none p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition">
                         <i id="theme-toggle-dark-icon" class="fas fa-moon hidden text-lg"></i>
                         <i id="theme-toggle-light-icon" class="fas fa-sun hidden text-lg"></i>
                     </button>
@@ -85,27 +85,27 @@
                     <form action="{% url 'search' %}" method="get" class="hidden md:block">
                         <div class="relative">
                             <input type="text" name="q" placeholder="Search..." 
-                                   class="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 dark:text-gray-500"></i>
+                                   class="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 dark:text-zinc-600"></i>
                         </div>
                     </form>
-                    <div class="relative group">
-                        <button class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition">
+                    <div class="relative">
+                        <button id="profile-toggle" class="flex items-center text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">
                             <i class="fas fa-user-circle text-2xl"></i>
                             <span class="ml-2 text-sm font-medium">{{ user.username }}</span>
                             <i class="fas fa-chevron-down ml-1 text-xs"></i>
                         </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg py-1 z-50 hidden group-hover:block transition">
-                            <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                        <div id="profile-menu" class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-800 rounded-md shadow-lg py-1 z-50 hidden">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
                                 <i class="fas fa-user mr-2"></i> Profile
                             </a>
-                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </a>
                         </div>
                     </div>
                     {% else %}
-                    <a href="{% url 'login' %}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition">Login</a>
+                    <a href="{% url 'login' %}" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white text-sm font-medium transition">Login</a>
                     <a href="{% url 'register' %}" class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition">
                         Get Started
                     </a>
@@ -118,7 +118,7 @@
     {% if messages %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         {% for message in messages %}
-        <div class="mb-2 p-4 rounded-lg transition {% if message.tags == 'success' %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200{% elif message.tags == 'error' %}bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200{% elif message.tags == 'warning' %}bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200{% else %}bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200{% endif %}">
+        <div class="mb-2 p-4 rounded-lg transition {% if message.tags == 'success' %}bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300{% elif message.tags == 'error' %}bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300{% elif message.tags == 'warning' %}bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300{% else %}bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300{% endif %}">
             <div class="flex items-center">
                 <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-2"></i>
                 {{ message }}
@@ -132,13 +132,13 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto transition">
+    <footer class="bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 mt-auto transition">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
-                <p class="text-gray-500 dark:text-gray-400 text-sm transition">DocTrack - Version Control for Business Teams</p>
+                <p class="text-gray-500 dark:text-zinc-400 text-sm transition">DocTrack - Version Control for Business Teams</p>
                 <div class="flex space-x-4">
-                    <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"><i class="fab fa-github"></i></a>
-                    <a href="#" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-400 dark:text-zinc-600 hover:text-gray-600 dark:hover:text-zinc-400 transition"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-gray-400 dark:text-zinc-600 hover:text-gray-600 dark:hover:text-zinc-400 transition"><i class="fab fa-twitter"></i></a>
                 </div>
             </div>
         </div>
@@ -192,6 +192,31 @@
                 document.documentElement.classList.add('dark');
             }
         });
+
+        // Profile Dropdown Toggle
+        var profileToggle = document.getElementById('profile-toggle');
+        var profileMenu = document.getElementById('profile-menu');
+
+        if (profileToggle && profileMenu) {
+            profileToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                profileMenu.classList.toggle('hidden');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileToggle.contains(e.target) && !profileMenu.contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
+
+            // Close menu when clicking on profile or logout links
+            profileMenu.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    profileMenu.classList.add('hidden');
+                });
+            });
+        }
     </script>
     {% block extra_js %}{% endblock %}
 </body>
