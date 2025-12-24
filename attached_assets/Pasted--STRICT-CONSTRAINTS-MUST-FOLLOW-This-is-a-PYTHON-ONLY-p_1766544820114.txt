@@ -1,0 +1,99 @@
+🚨 STRICT CONSTRAINTS — MUST FOLLOW 🚨
+
+- This is a PYTHON-ONLY project.
+- Backend MUST be Django (Python).
+- Frontend MUST be Django Templates + Tailwind CSS.
+- Database MUST be SQLite.
+- DO NOT use Node.js, Express, Next.js, React, Vite, or any JavaScript backend framework.
+- DO NOT create package.json, server.js, node_modules, or any Node-related files.
+- If Node.js code is generated, the output is INVALID.
+
+PROJECT CONTEXT:
+
+You are inside an existing Python Replit environment.
+I already have a Django project named "DocTrack".
+You must ANALYZE and IMPROVE the EXISTING Django project.
+Do NOT scaffold a new project in another stack.
+
+TECH STACK (LOCKED):
+
+- Backend: Django (Python)
+- Frontend: Django Templates
+- Styling: Tailwind CSS
+- Database: SQLite
+- Authentication: Django built-in auth
+
+TASK:
+
+Analyze the DocTrack Django project and optimize it with the following enhancements while keeping the same stack.
+
+FEATURE REQUIREMENTS:
+
+1. THEME SYSTEM
+- Add Light and Dark theme support using Tailwind CSS.
+- Add a theme toggle button in the navbar.
+- Save theme preference using localStorage.
+- Ensure all pages, cards, tables, forms, modals, and alerts support both themes.
+
+2. AUTHENTICATION & LOGOUT
+- Ensure login, registration, and logout work correctly.
+- Fix logout so it clears session and redirects to login page.
+- Protect views using @login_required.
+- Prevent unauthorized access to URLs.
+
+3. USER PROFILE & ROLES
+- Create a User Profile page.
+- Display name, email, role, joined date.
+- Allow users to update profile details.
+- Implement role-based access:
+  - Admin: manage users, documents, and statuses.
+  - User: upload, view, and track documents only.
+
+4. FUNCTIONALITY FIXES
+- Ensure all buttons, links, and forms work properly.
+- Fix broken redirects, validations, and actions.
+- Add Django messages for success and error feedback.
+
+5. DOCUMENT TRACKING
+- Improve document status flow:
+  Uploaded → In Review → Approved / Rejected
+- Show colored status badges.
+- Add document history or timeline view.
+- Improve table readability and UX.
+
+6. UI, ANIMATIONS & DESIGN
+- Modernize UI using Tailwind CSS.
+- Add hover effects, transitions, and smooth animations.
+- Animate buttons, cards, alerts, and modals.
+- Use icons (Heroicons or SVG).
+- Improve dashboard layout and spacing.
+
+7. DASHBOARD IMPROVEMENTS
+- Create clean, responsive dashboard.
+- Add summary cards:
+  Total Documents, Pending, Approved, Rejected.
+- Improve tables with hover and focus effects.
+
+8. CODE OPTIMIZATION
+- Refactor views, templates, and URLs.
+- Follow Django best practices.
+- Remove unused code.
+- Add comments where needed for clarity.
+
+9. SECURITY
+- CSRF protection everywhere.
+- Secure file uploads.
+- Prevent direct URL access without permissions.
+
+OUTPUT EXPECTATION:
+
+- Modify existing Django files only.
+- Provide Django models, views, templates, and Tailwind CSS classes.
+- No Node.js files or code.
+- Project must run successfully using:
+  python manage.py runserver
+
+Work step-by-step:
+- Analyze first
+- Then implement improvements module-wise
+- Ensure stability and correctness at each step
