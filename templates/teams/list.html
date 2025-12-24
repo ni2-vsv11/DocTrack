@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Teams - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Teams</h1>
+        <p class="text-gray-600">Manage your teams and collaborators</p>
+    </div>
+    <a href="{% url 'team_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+        <i class="fas fa-plus mr-2"></i> Create Team
+    </a>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+    {% for team in teams %}
+    <a href="{% url 'team_detail' pk=team.pk %}" class="block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
+        <div class="p-6">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <i class="fas fa-users text-green-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ team.name }}</h3>
+            <p class="text-gray-600 text-sm mb-4">{{ team.description|default:"No description"|truncatechars:60 }}</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <i class="fas fa-user mr-1"></i> {{ team.members.count }} members
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <div class="col-span-3 bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <i class="fas fa-users text-gray-300 text-6xl mb-6"></i>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No teams yet</h3>
+        <p class="text-gray-600 mb-6">Create a team to collaborate with others</p>
+        <a href="{% url 'team_create' %}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            <i class="fas fa-plus mr-2"></i> Create Team
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

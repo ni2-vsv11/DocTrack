@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ work_item.title }} - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center">
+        <a href="{% url 'project_work_items' project_pk=project.pk %}" class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <div class="flex items-center space-x-3">
+                <span class="px-3 py-1 text-sm rounded-full 
+                    {% if work_item.status == 'open' %}bg-yellow-100 text-yellow-800
+                    {% elif work_item.status == 'in_progress' %}bg-blue-100 text-blue-800
+                    {% elif work_item.status == 'done' %}bg-green-100 text-green-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ work_item.get_status_display }}
+                </span>
+                <h1 class="text-2xl font-bold text-gray-900">{{ work_item.title }}</h1>
+            </div>
+            <p class="text-gray-600 mt-1">
+                <a href="{% url 'project_detail' pk=project.pk %}" class="text-blue-600 hover:underline">{{ project.name }}</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-8">
+    <div class="md:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i> Description
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="prose max-w-none">
+                    <p class="text-gray-700">{{ work_item.description|default:"No description provided." }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-comments text-purple-600 mr-2"></i> Comments
+                </h2>
+            </div>
+            <div class="p-6">
+                <form action="{% url 'add_comment' %}" method="post" class="mb-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="work_item_id" value="{{ work_item.pk }}">
+                    <input type="hidden" name="redirect_url" value="{{ request.path }}">
+                    <textarea name="content" rows="3" required
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Add a comment..."></textarea>
+                    <div class="mt-2 flex justify-end">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-paper-plane mr-2"></i> Comment
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="space-y-4">
+                    {% for comment in comments %}
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-900">{{ comment.content }}</p>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">
+                                {{ comment.author.username }} • {{ comment.created_at|timesince }} ago
+                            </p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-center">No comments yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-sliders-h text-blue-600 mr-2"></i> Update Status
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-2 gap-2" id="status-buttons">
+                    <button onclick="updateStatus('open')" 
+                            class="px-3 py-2 text-sm rounded-lg border {% if work_item.status == 'open' %}bg-yellow-100 border-yellow-300{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+                        Open
+                    </button>
+                    <button onclick="updateStatus('in_progress')" 
+                            class="px-3 py-2 text-sm rounded-lg border {% if work_item.status == 'in_progress' %}bg-blue-100 border-blue-300{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+                        In Progress
+                    </button>
+                    <button onclick="updateStatus('review')" 
+                            class="px-3 py-2 text-sm rounded-lg border {% if work_item.status == 'review' %}bg-purple-100 border-purple-300{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+                        In Review
+                    </button>
+                    <button onclick="updateStatus('done')" 
+                            class="px-3 py-2 text-sm rounded-lg border {% if work_item.status == 'done' %}bg-green-100 border-green-300{% else %}border-gray-200 hover:bg-gray-50{% endif %}">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-info text-gray-600 mr-2"></i> Details
+                </h3>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <p class="text-sm text-gray-500">Type</p>
+                    <p class="font-medium text-gray-900 flex items-center">
+                        <i class="fas fa-{% if work_item.item_type == 'bug' %}bug text-red-600{% elif work_item.item_type == 'feature' %}lightbulb text-purple-600{% elif work_item.item_type == 'issue' %}exclamation-circle text-yellow-600{% else %}check-square text-blue-600{% endif %} mr-2"></i>
+                        {{ work_item.get_item_type_display }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Priority</p>
+                    <p class="font-medium priority-{{ work_item.priority }}">
+                        <i class="fas fa-flag mr-1"></i> {{ work_item.get_priority_display }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Assigned To</p>
+                    <p class="font-medium text-gray-900">{{ work_item.assigned_to.username|default:"Unassigned" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Created By</p>
+                    <p class="font-medium text-gray-900">{{ work_item.created_by.username }}</p>
+                </div>
+                {% if work_item.due_date %}
+                <div>
+                    <p class="text-sm text-gray-500">Due Date</p>
+                    <p class="font-medium text-gray-900">{{ work_item.due_date }}</p>
+                </div>
+                {% endif %}
+                <div>
+                    <p class="text-sm text-gray-500">Created</p>
+                    <p class="font-medium text-gray-900">{{ work_item.created_at|date:"M d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateStatus(status) {
+    fetch('{% url "work_item_update_status" pk=work_item.pk %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: 'status=' + status
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

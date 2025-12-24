@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center">
+    <a href="{% url 'team_list' %}" class="text-gray-600 hover:text-gray-900 mr-4">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-users text-green-600 mr-3"></i>
+            {{ team.name }}
+        </h1>
+        <p class="text-gray-600">{{ team.description|default:"No description" }}</p>
+    </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-user-friends text-blue-600 mr-2"></i> Members
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for membership in memberships %}
+            <div class="p-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-user text-gray-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">{{ membership.user.username }}</p>
+                        <p class="text-sm text-gray-500">{{ membership.user.email }}</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 text-xs rounded-full 
+                    {% if membership.role == 'owner' %}bg-yellow-100 text-yellow-800
+                    {% elif membership.role == 'admin' %}bg-purple-100 text-purple-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ membership.get_role_display }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-folder text-yellow-600 mr-2"></i> Team Projects
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for project in projects %}
+            <a href="{% url 'project_detail' pk=project.pk %}" class="block p-4 hover:bg-gray-50">
+                <p class="font-medium text-gray-900">{{ project.name }}</p>
+                <p class="text-sm text-gray-500">{{ project.get_document_count }} documents</p>
+            </a>
+            {% empty %}
+            <div class="p-6 text-center text-gray-500">
+                <p>No projects yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

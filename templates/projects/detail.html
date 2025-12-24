@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center">
+        <a href="{% url 'project_list' %}" class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-folder text-blue-600 mr-3"></i>
+                {{ project.name }}
+                {% if project.is_public %}
+                <span class="ml-2 text-green-600 text-sm"><i class="fas fa-globe"></i></span>
+                {% endif %}
+            </h1>
+            <p class="text-gray-600">{{ project.description|default:"No description" }}</p>
+        </div>
+    </div>
+    <div class="flex space-x-3">
+        <a href="{% url 'document_upload' project_pk=project.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            <i class="fas fa-upload mr-2"></i> Upload Document
+        </a>
+        {% if project.owner == request.user %}
+        <a href="{% url 'project_settings' pk=project.pk %}" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+            <i class="fas fa-cog"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-gray-600">Documents</span>
+            <span class="text-2xl font-bold text-gray-900">{{ documents.count }}</span>
+        </div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-gray-600">Open Reviews</span>
+            <span class="text-2xl font-bold text-yellow-600">{{ open_prs.count }}</span>
+        </div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-gray-200">
+        <div class="flex items-center justify-between">
+            <span class="text-gray-600">Active Tasks</span>
+            <span class="text-2xl font-bold text-green-600">{{ work_items.count }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-8">
+    <div class="md:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-file-alt text-blue-600 mr-2"></i> Documents
+                </h2>
+                <a href="{% url 'document_upload' project_pk=project.pk %}" class="text-blue-600 text-sm hover:underline">
+                    <i class="fas fa-plus mr-1"></i> Add
+                </a>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for doc in documents %}
+                <a href="{% url 'document_detail' pk=doc.pk %}" class="block p-4 hover:bg-gray-50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-4
+                            {% if doc.file_type == 'pdf' %}bg-red-100{% elif doc.file_type == 'word' %}bg-blue-100{% elif doc.file_type == 'image' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                            <i class="fas fa-{% if doc.file_type == 'pdf' %}file-pdf text-red-600{% elif doc.file_type == 'word' %}file-word text-blue-600{% elif doc.file_type == 'image' %}file-image text-green-600{% else %}file text-gray-600{% endif %}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ doc.name }}</p>
+                            <p class="text-sm text-gray-500">
+                                {{ doc.version_count }} version{{ doc.version_count|pluralize }} • 
+                                Updated {{ doc.updated_at|timesince }} ago
+                            </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="p-8 text-center text-gray-500">
+                    <i class="fas fa-file-upload text-4xl mb-4"></i>
+                    <p>No documents yet</p>
+                    <a href="{% url 'document_upload' project_pk=project.pk %}" class="text-blue-600 hover:underline mt-2 inline-block">Upload your first document</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-code-pull-request text-yellow-600 mr-2"></i> Open Reviews
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for pr in open_prs %}
+                <a href="{% url 'pull_request_detail' pk=pr.pk %}" class="block p-3 hover:bg-gray-50">
+                    <p class="font-medium text-gray-900 text-sm">{{ pr.title|truncatechars:40 }}</p>
+                    <p class="text-xs text-gray-500">by {{ pr.created_by.username }}</p>
+                </a>
+                {% empty %}
+                <div class="p-4 text-center text-gray-500 text-sm">
+                    No open reviews
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-tasks text-green-600 mr-2"></i> Tasks
+                </h3>
+                <a href="{% url 'work_item_create' project_pk=project.pk %}" class="text-blue-600 text-sm hover:underline">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for item in work_items %}
+                <a href="{% url 'work_item_detail' pk=item.pk %}" class="block p-3 hover:bg-gray-50">
+                    <div class="flex items-center">
+                        <span class="priority-{{ item.priority }} mr-2">
+                            <i class="fas fa-circle text-xs"></i>
+                        </span>
+                        <p class="font-medium text-gray-900 text-sm">{{ item.title|truncatechars:35 }}</p>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="p-4 text-center text-gray-500 text-sm">
+                    No active tasks
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-clock text-gray-600 mr-2"></i> Recent Activity
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                {% for activity in activities %}
+                <div class="p-3">
+                    <p class="text-sm text-gray-900">
+                        <span class="font-medium">{{ activity.user.username }}</span>
+                        {{ activity.action }} {{ activity.target_name|truncatechars:25 }}
+                    </p>
+                    <p class="text-xs text-gray-500">{{ activity.created_at|timesince }} ago</p>
+                </div>
+                {% empty %}
+                <div class="p-4 text-center text-gray-500 text-sm">
+                    No recent activity
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

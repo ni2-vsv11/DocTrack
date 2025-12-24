@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Compare Versions - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'document_detail' pk=document.pk %}" class="text-gray-600 hover:text-gray-900">
+        <i class="fas fa-arrow-left mr-2"></i> Back to {{ document.name }}
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">
+        <i class="fas fa-code-compare text-blue-600 mr-2"></i> Compare Versions
+    </h1>
+    
+    <form method="get" class="flex items-center space-x-4">
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">From Version</label>
+            <select name="v1" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">Select version...</option>
+                {% for v in versions %}
+                <option value="{{ v.pk }}" {% if version1.pk == v.pk %}selected{% endif %}>
+                    v{{ v.version_number }} - {{ v.created_at|date:"M d, Y" }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="pt-6">
+            <i class="fas fa-arrow-right text-gray-400"></i>
+        </div>
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">To Version</label>
+            <select name="v2" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">Select version...</option>
+                {% for v in versions %}
+                <option value="{{ v.pk }}" {% if version2.pk == v.pk %}selected{% endif %}>
+                    v{{ v.version_number }} - {{ v.created_at|date:"M d, Y" }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="pt-6">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-search mr-2"></i> Compare
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if comparison %}
+    {% if comparison.can_compare %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-900">
+                <i class="fas fa-chart-bar text-purple-600 mr-2"></i> Change Summary
+            </h2>
+        </div>
+        <div class="p-4">
+            <div class="grid grid-cols-4 gap-4 text-center">
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-2xl font-bold text-green-600">+{{ comparison.stats.lines_added }}</p>
+                    <p class="text-sm text-gray-600">Lines Added</p>
+                </div>
+                <div class="p-4 bg-red-50 rounded-lg">
+                    <p class="text-2xl font-bold text-red-600">-{{ comparison.stats.lines_removed }}</p>
+                    <p class="text-sm text-gray-600">Lines Removed</p>
+                </div>
+                <div class="p-4 bg-yellow-50 rounded-lg">
+                    <p class="text-2xl font-bold text-yellow-600">{{ comparison.stats.lines_changed }}</p>
+                    <p class="text-sm text-gray-600">Lines Changed</p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-2xl font-bold text-blue-600">{{ comparison.stats.similarity_percent }}%</p>
+                    <p class="text-sm text-gray-600">Similarity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-4 border-b border-gray-200">
+            <h2 class="font-semibold text-gray-900">
+                <i class="fas fa-columns text-blue-600 mr-2"></i> Side-by-Side Comparison
+            </h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left w-1/2 border-r border-gray-200">
+                            Version {{ version1.version_number }} ({{ version1.created_at|date:"M d, Y" }})
+                        </th>
+                        <th class="px-4 py-2 text-left w-1/2">
+                            Version {{ version2.version_number }} ({{ version2.created_at|date:"M d, Y" }})
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="font-mono text-xs">
+                    {% for row in comparison.side_by_side %}
+                    <tr class="{% if row.type == 'delete' %}diff-removed{% elif row.type == 'insert' %}diff-added{% elif row.type == 'change' %}diff-changed{% endif %}">
+                        <td class="px-4 py-1 border-r border-gray-200 whitespace-pre-wrap">
+                            {% if row.left %}
+                            <span class="text-gray-400 mr-2">{{ row.left.line }}</span>{{ row.left.content }}
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-1 whitespace-pre-wrap">
+                            {% if row.right %}
+                            <span class="text-gray-400 mr-2">{{ row.right.line }}</span>{{ row.right.content }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
+        <i class="fas fa-exclamation-triangle text-yellow-600 text-4xl mb-4"></i>
+        <h3 class="text-lg font-semibold text-yellow-800 mb-2">Cannot Compare</h3>
+        <p class="text-yellow-700">{{ comparison.error|default:"Unable to extract text for comparison. This file type may not support text comparison." }}</p>
+    </div>
+    {% endif %}
+{% elif version1 or version2 %}
+<div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+    <i class="fas fa-info-circle text-blue-600 text-4xl mb-4"></i>
+    <h3 class="text-lg font-semibold text-blue-800 mb-2">Select Two Versions</h3>
+    <p class="text-blue-700">Please select both versions to compare.</p>
+</div>
+{% else %}
+<div class="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+    <i class="fas fa-code-compare text-gray-400 text-6xl mb-6"></i>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Compare Document Versions</h3>
+    <p class="text-gray-600">Select two versions above to see the differences between them.</p>
+</div>
+{% endif %}
+{% endblock %}

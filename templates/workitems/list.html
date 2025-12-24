@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Work Items - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+            {% if project %}{{ project.name }} - {% endif %}Work Items
+        </h1>
+        <p class="text-gray-600">Track tasks, issues, and feature requests</p>
+    </div>
+    {% if project %}
+    <a href="{% url 'work_item_create' project_pk=project.pk %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+        <i class="fas fa-plus mr-2"></i> New Task
+    </a>
+    {% endif %}
+</div>
+
+<div class="mb-6 flex space-x-2">
+    <a href="{% if project %}{% url 'project_work_items' project_pk=project.pk %}{% else %}{% url 'work_item_list' %}{% endif %}" 
+       class="px-4 py-2 rounded-lg {% if not request.GET.status %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+        All
+    </a>
+    <a href="?status=open" class="px-4 py-2 rounded-lg {% if request.GET.status == 'open' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+        Open
+    </a>
+    <a href="?status=in_progress" class="px-4 py-2 rounded-lg {% if request.GET.status == 'in_progress' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+        In Progress
+    </a>
+    <a href="?status=done" class="px-4 py-2 rounded-lg {% if request.GET.status == 'done' %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+        Done
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="divide-y divide-gray-100">
+        {% for item in work_items %}
+        <a href="{% url 'work_item_detail' pk=item.pk %}" class="block p-6 hover:bg-gray-50">
+            <div class="flex items-start justify-between">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-4
+                        {% if item.item_type == 'bug' %}bg-red-100{% elif item.item_type == 'feature' %}bg-purple-100{% elif item.item_type == 'issue' %}bg-yellow-100{% else %}bg-blue-100{% endif %}">
+                        <i class="fas fa-{% if item.item_type == 'bug' %}bug text-red-600{% elif item.item_type == 'feature' %}lightbulb text-purple-600{% elif item.item_type == 'issue' %}exclamation-circle text-yellow-600{% else %}check-square text-blue-600{% endif %}"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ item.title }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            <i class="fas fa-folder mr-1"></i> {{ item.project.name }}
+                            {% if item.assigned_to %}
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-user mr-1"></i> {{ item.assigned_to.username }}
+                            {% endif %}
+                        </p>
+                        <div class="flex items-center mt-2 space-x-3">
+                            <span class="priority-{{ item.priority }} text-sm">
+                                <i class="fas fa-flag mr-1"></i> {{ item.get_priority_display }}
+                            </span>
+                            {% if item.due_date %}
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-calendar mr-1"></i> {{ item.due_date }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <span class="px-3 py-1 text-sm rounded-full 
+                    {% if item.status == 'open' %}bg-yellow-100 text-yellow-800
+                    {% elif item.status == 'in_progress' %}bg-blue-100 text-blue-800
+                    {% elif item.status == 'done' %}bg-green-100 text-green-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ item.get_status_display }}
+                </span>
+            </div>
+        </a>
+        {% empty %}
+        <div class="p-12 text-center text-gray-500">
+            <i class="fas fa-tasks text-6xl mb-6 text-gray-300"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No work items</h3>
+            <p class="text-gray-600">Create tasks and issues to track your work</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if work_items.has_other_pages %}
+<div class="mt-8 flex justify-center">
+    <nav class="flex space-x-2">
+        {% if work_items.has_previous %}
+        <a href="?page={{ work_items.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Previous</a>
+        {% endif %}
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ work_items.number }}</span>
+        {% if work_items.has_next %}
+        <a href="?page={{ work_items.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Next</a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

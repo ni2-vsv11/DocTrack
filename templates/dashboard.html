@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user.first_name|default:user.username }}!</h1>
+    <p class="text-gray-600 mt-1">Here's what's happening with your documents</p>
+</div>
+
+<div class="grid md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Projects</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.total_projects }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-folder text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Open Pull Requests</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.open_prs }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-code-pull-request text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Pending Reviews</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.pending_reviews }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-eye text-purple-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">My Tasks</p>
+                <p class="text-3xl font-bold text-gray-900">{{ stats.my_tasks }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-tasks text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-folder text-blue-600 mr-2"></i> Recent Projects
+            </h2>
+            <a href="{% url 'project_create' %}" class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-plus mr-1"></i> New Project
+            </a>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for project in projects %}
+            <a href="{% url 'project_detail' pk=project.pk %}" class="block p-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">{{ project.name }}</p>
+                        <p class="text-sm text-gray-500">{{ project.get_document_count }} documents</p>
+                    </div>
+                    <span class="px-3 py-1 text-xs rounded-full {% if project.status == 'active' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ project.get_status_display }}
+                    </span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-folder-open text-4xl mb-4"></i>
+                <p>No projects yet. Create your first project!</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% if projects %}
+        <div class="p-4 border-t border-gray-100">
+            <a href="{% url 'project_list' %}" class="text-blue-600 text-sm hover:underline">View all projects →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-code-pull-request text-yellow-600 mr-2"></i> Open Pull Requests
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for pr in open_prs %}
+            <a href="{% url 'pull_request_detail' pk=pr.pk %}" class="block p-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium text-gray-900">{{ pr.title }}</p>
+                        <p class="text-sm text-gray-500">{{ pr.document.name }} • {{ pr.created_by.username }}</p>
+                    </div>
+                    <span class="px-3 py-1 text-xs rounded-full status-{{ pr.status }}">
+                        {{ pr.get_status_display }}
+                    </span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-check-circle text-4xl mb-4"></i>
+                <p>No open pull requests. Great job!</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% if open_prs %}
+        <div class="p-4 border-t border-gray-100">
+            <a href="{% url 'pull_request_list' %}" class="text-blue-600 text-sm hover:underline">View all pull requests →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-tasks text-green-600 mr-2"></i> My Tasks
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            {% for item in my_work_items %}
+            <a href="{% url 'work_item_detail' pk=item.pk %}" class="block p-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="priority-{{ item.priority }} mr-3">
+                            <i class="fas fa-{% if item.item_type == 'bug' %}bug{% elif item.item_type == 'feature' %}lightbulb{% else %}check-square{% endif %}"></i>
+                        </span>
+                        <div>
+                            <p class="font-medium text-gray-900">{{ item.title }}</p>
+                            <p class="text-sm text-gray-500">{{ item.project.name }}</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 text-xs rounded-full {% if item.status == 'open' %}bg-yellow-100 text-yellow-800{% elif item.status == 'in_progress' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-clipboard-check text-4xl mb-4"></i>
+                <p>No assigned tasks. You're all caught up!</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% if my_work_items %}
+        <div class="p-4 border-t border-gray-100">
+            <a href="{% url 'work_item_list' %}" class="text-blue-600 text-sm hover:underline">View all tasks →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-clock text-gray-600 mr-2"></i> Recent Activity
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+            {% for activity in recent_activities %}
+            <div class="p-4">
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-{% if activity.action == 'created' %}plus{% elif activity.action == 'uploaded' %}upload{% elif activity.action == 'approved' %}check{% elif activity.action == 'merged' %}code-merge{% else %}edit{% endif %} text-gray-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-900">
+                            <span class="font-medium">{{ activity.user.username }}</span>
+                            {{ activity.action }}
+                            <span class="text-blue-600">{{ activity.target_name|truncatechars:30 }}</span>
+                        </p>
+                        <p class="text-xs text-gray-500">{{ activity.created_at|timesince }} ago</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-history text-4xl mb-4"></i>
+                <p>No recent activity</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="fixed bottom-8 right-8">
+    <button id="quick-actions-btn" class="w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center">
+        <i class="fas fa-bolt text-xl"></i>
+    </button>
+    <div id="quick-actions-menu" class="hidden absolute bottom-16 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 w-48">
+        <a href="{% url 'project_create' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-folder-plus mr-2 text-blue-600"></i> New Project
+        </a>
+        <a href="{% url 'team_create' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-users mr-2 text-green-600"></i> Create Team
+        </a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('quick-actions-btn').addEventListener('click', function() {
+        document.getElementById('quick-actions-menu').classList.toggle('hidden');
+    });
+</script>
+{% endblock %}

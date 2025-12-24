@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pr.title }} - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center">
+        <a href="{% url 'pull_request_list' %}" class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <div class="flex items-center">
+                <span class="px-3 py-1 text-sm rounded-full status-{{ pr.status }} mr-3">
+                    {{ pr.get_status_display }}
+                </span>
+                <h1 class="text-2xl font-bold text-gray-900">{{ pr.title }}</h1>
+            </div>
+            <p class="text-gray-600 mt-1">
+                <a href="{% url 'document_detail' pk=pr.document.pk %}" class="text-blue-600 hover:underline">{{ pr.document.name }}</a>
+                in 
+                <a href="{% url 'project_detail' pk=pr.project.pk %}" class="text-blue-600 hover:underline">{{ pr.project.name }}</a>
+            </p>
+        </div>
+    </div>
+    <div class="flex space-x-3">
+        {% if can_merge %}
+        <form action="{% url 'pull_request_merge' pk=pr.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-code-merge mr-2"></i> Merge
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-8">
+    <div class="md:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i> Details
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="prose max-w-none">
+                    <p class="text-gray-700">{{ pr.description|default:"No description provided." }}</p>
+                </div>
+                
+                <div class="mt-6 flex items-center space-x-6 text-sm text-gray-500">
+                    <span>
+                        <i class="fas fa-user mr-1"></i> {{ pr.created_by.username }}
+                    </span>
+                    <span>
+                        <i class="fas fa-calendar mr-1"></i> {{ pr.created_at|date:"M d, Y H:i" }}
+                    </span>
+                    {% if pr.merged_at %}
+                    <span class="text-purple-600">
+                        <i class="fas fa-code-merge mr-1"></i> Merged by {{ pr.merged_by.username }} on {{ pr.merged_at|date:"M d, Y" }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if pr.target_version and comparison %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-code-compare text-green-600 mr-2"></i> Changes
+                </h2>
+            </div>
+            {% if comparison.can_compare %}
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex space-x-6 text-sm">
+                    <span class="text-green-600"><i class="fas fa-plus mr-1"></i> {{ comparison.stats.lines_added }} added</span>
+                    <span class="text-red-600"><i class="fas fa-minus mr-1"></i> {{ comparison.stats.lines_removed }} removed</span>
+                    <span class="text-blue-600"><i class="fas fa-percent mr-1"></i> {{ comparison.stats.similarity_percent }}% similar</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto max-h-96">
+                <table class="w-full text-sm font-mono">
+                    {% for row in comparison.side_by_side %}
+                    <tr class="{% if row.type == 'delete' %}diff-removed{% elif row.type == 'insert' %}diff-added{% elif row.type == 'change' %}diff-changed{% endif %}">
+                        <td class="px-2 py-1 text-gray-400 text-right w-12 border-r select-none">
+                            {% if row.left %}{{ row.left.line }}{% endif %}
+                        </td>
+                        <td class="px-4 py-1 whitespace-pre-wrap border-r">
+                            {% if row.left %}{{ row.left.content }}{% endif %}
+                        </td>
+                        <td class="px-2 py-1 text-gray-400 text-right w-12 border-r select-none">
+                            {% if row.right %}{{ row.right.line }}{% endif %}
+                        </td>
+                        <td class="px-4 py-1 whitespace-pre-wrap">
+                            {% if row.right %}{{ row.right.content }}{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% else %}
+            <div class="p-6 text-center text-gray-500">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
+                <p>{{ comparison.error|default:"Cannot display diff for this file type." }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-comments text-purple-600 mr-2"></i> Discussion
+                </h2>
+            </div>
+            <div class="p-6">
+                <form action="{% url 'add_comment' %}" method="post" class="mb-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="pr_id" value="{{ pr.pk }}">
+                    <input type="hidden" name="redirect_url" value="{{ request.path }}">
+                    <textarea name="content" rows="3" required
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Add a comment..."></textarea>
+                    <div class="mt-2 flex justify-end">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-paper-plane mr-2"></i> Comment
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="space-y-4">
+                    {% for comment in comments %}
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-900">{{ comment.content }}</p>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">
+                                {{ comment.author.username }} • {{ comment.created_at|timesince }} ago
+                            </p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-center">No comments yet. Start the discussion!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        {% if can_review %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-check-circle text-green-600 mr-2"></i> Submit Review
+                </h3>
+            </div>
+            <div class="p-4">
+                <form action="{% url 'pull_request_review' pk=pr.pk %}" method="post">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="status" value="approved" class="mr-3">
+                                <div>
+                                    <p class="font-medium text-green-600"><i class="fas fa-check mr-2"></i> Approve</p>
+                                    <p class="text-sm text-gray-500">Looks good to me!</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="status" value="rejected" class="mr-3">
+                                <div>
+                                    <p class="font-medium text-red-600"><i class="fas fa-times mr-2"></i> Request Changes</p>
+                                    <p class="text-sm text-gray-500">Needs some updates</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div>
+                            <textarea name="comment" rows="2"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                      placeholder="Optional review comments..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-history text-blue-600 mr-2"></i> Reviews
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for review in reviews %}
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium text-gray-900">{{ review.reviewer.username }}</span>
+                        <span class="px-2 py-1 text-xs rounded-full 
+                            {% if review.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif review.status == 'rejected' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ review.get_status_display }}
+                        </span>
+                    </div>
+                    {% if review.comment %}
+                    <p class="text-sm text-gray-600 mt-1">{{ review.comment }}</p>
+                    {% endif %}
+                    <p class="text-xs text-gray-500 mt-1">{{ review.created_at|timesince }} ago</p>
+                </div>
+                {% empty %}
+                <div class="p-4 text-center text-gray-500 text-sm">
+                    No reviews yet
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-file-alt text-gray-600 mr-2"></i> Versions
+                </h3>
+            </div>
+            <div class="p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">New Version</span>
+                    <a href="{{ pr.source_version.file.url }}" download class="text-blue-600 hover:underline text-sm">
+                        v{{ pr.source_version.version_number }} <i class="fas fa-download ml-1"></i>
+                    </a>
+                </div>
+                {% if pr.target_version %}
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Previous Version</span>
+                    <a href="{{ pr.target_version.file.url }}" download class="text-blue-600 hover:underline text-sm">
+                        v{{ pr.target_version.version_number }} <i class="fas fa-download ml-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

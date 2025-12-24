@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document.name }} - DocTrack{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center">
+        <a href="{% url 'project_detail' pk=project.pk %}" class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-{% if document.file_type == 'pdf' %}file-pdf text-red-600{% elif document.file_type == 'word' %}file-word text-blue-600{% elif document.file_type == 'image' %}file-image text-green-600{% else %}file text-gray-600{% endif %} mr-3"></i>
+                {{ document.name }}
+            </h1>
+            <p class="text-gray-600">{{ document.description|default:"No description" }}</p>
+        </div>
+    </div>
+    <div class="flex space-x-3">
+        <a href="{% url 'document_upload_version' pk=document.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            <i class="fas fa-upload mr-2"></i> Upload New Version
+        </a>
+        <a href="{% url 'pull_request_create' document_pk=document.pk %}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+            <i class="fas fa-code-pull-request mr-2"></i> Create Review
+        </a>
+        {% if versions.count > 1 %}
+        <a href="{% url 'document_compare' pk=document.pk %}" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+            <i class="fas fa-code-compare mr-2"></i> Compare
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-8">
+    <div class="md:col-span-2">
+        {% if latest_version %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-file text-blue-600 mr-2"></i> Current Version (v{{ latest_version.version_number }})
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4
+                            {% if document.file_type == 'pdf' %}bg-red-100{% elif document.file_type == 'word' %}bg-blue-100{% elif document.file_type == 'image' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                            <i class="fas fa-{% if document.file_type == 'pdf' %}file-pdf text-red-600{% elif document.file_type == 'word' %}file-word text-blue-600{% elif document.file_type == 'image' %}file-image text-green-600{% else %}file text-gray-600{% endif %} text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">{{ latest_version.file.name|cut:"versions/" }}</p>
+                            <p class="text-sm text-gray-500">
+                                {% if file_info %}{{ file_info.size_formatted }}{% endif %} • 
+                                Uploaded {{ latest_version.created_at|timesince }} ago
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ latest_version.file.url }}" download class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition">
+                        <i class="fas fa-download mr-2"></i> Download
+                    </a>
+                </div>
+                
+                {% if latest_version.change_summary %}
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-comment mr-2"></i> {{ latest_version.change_summary }}
+                    </p>
+                </div>
+                {% endif %}
+                
+                {% if document.file_type == 'image' %}
+                <div class="mt-4">
+                    <img src="{{ latest_version.file.url }}" alt="{{ document.name }}" class="max-w-full h-auto rounded-lg border border-gray-200">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-history text-purple-600 mr-2"></i> Version History
+                </h2>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for version in versions %}
+                <div class="p-4 {% if forloop.first %}bg-blue-50{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                                <span class="font-bold text-gray-600">v{{ version.version_number }}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">
+                                    Version {{ version.version_number }}
+                                    {% if forloop.first %}<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Latest</span>{% endif %}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    {{ version.uploaded_by.username }} • {{ version.created_at|date:"M d, Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{{ version.file.url }}" download class="text-blue-600 hover:underline text-sm">
+                            <i class="fas fa-download mr-1"></i> Download
+                        </a>
+                    </div>
+                    {% if version.change_summary %}
+                    <p class="mt-2 ml-14 text-sm text-gray-600">{{ version.change_summary }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i> Details
+                </h3>
+            </div>
+            <div class="p-4 space-y-3">
+                <div>
+                    <p class="text-sm text-gray-500">Type</p>
+                    <p class="font-medium text-gray-900">{{ document.get_file_type_display }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Created by</p>
+                    <p class="font-medium text-gray-900">{{ document.created_by.username }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Created</p>
+                    <p class="font-medium text-gray-900">{{ document.created_at|date:"M d, Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Versions</p>
+                    <p class="font-medium text-gray-900">{{ versions.count }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-code-pull-request text-yellow-600 mr-2"></i> Pull Requests
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for pr in pull_requests %}
+                <a href="{% url 'pull_request_detail' pk=pr.pk %}" class="block p-3 hover:bg-gray-50">
+                    <p class="font-medium text-gray-900 text-sm">{{ pr.title|truncatechars:35 }}</p>
+                    <span class="px-2 py-1 text-xs rounded-full status-{{ pr.status }}">{{ pr.get_status_display }}</span>
+                </a>
+                {% empty %}
+                <div class="p-4 text-center text-gray-500 text-sm">
+                    No pull requests
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="font-semibold text-gray-900">
+                    <i class="fas fa-comments text-green-600 mr-2"></i> Comments
+                </h3>
+            </div>
+            <div class="p-4">
+                <form action="{% url 'add_comment' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="document_id" value="{{ document.pk }}">
+                    <input type="hidden" name="redirect_url" value="{{ request.path }}">
+                    <textarea name="content" rows="2" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Add a comment..."></textarea>
+                    <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-1 rounded-lg text-sm hover:bg-blue-700">
+                        <i class="fas fa-paper-plane mr-1"></i> Post
+                    </button>
+                </form>
+                
+                <div class="mt-4 space-y-3">
+                    {% for comment in comments %}
+                    <div class="border-l-2 border-gray-200 pl-3">
+                        <p class="text-sm text-gray-900">{{ comment.content }}</p>
+                        <p class="text-xs text-gray-500">{{ comment.author.username }} • {{ comment.created_at|timesince }} ago</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500 text-sm">No comments yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
