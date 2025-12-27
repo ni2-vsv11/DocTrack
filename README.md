@@ -22,17 +22,21 @@ This project is developed as an **academic mini project** and follows standard D
 
 ## 📸 Screenshots
 
-### 🔐 Login Page
-![Login Page](screenshots/login.png)
+### Home
+<img width="1360" height="695" alt="Home-1" src="https://github.com/user-attachments/assets/388e247c-bef4-4497-b8ef-c6831cc763e0" />
+
 
 ### 📊 Dashboard
-![Dashboard](screenshots/dashboard.png)
+<img width="1360" height="695" alt="User-Dashboard" src="https://github.com/user-attachments/assets/f06eade8-50ee-44f6-a68c-aa38dd3ada12" />
+
 
 ### 📤 Document Upload
-![Document Upload](screenshots/upload.png)
+<img width="1360" height="695" alt="Upload-Doc" src="https://github.com/user-attachments/assets/c686ff65-26c5-418e-96e0-2575860e545f" />
+
 
 ### 🧑‍💼 Admin Panel
-![Admin Panel](screenshots/admin.png)
+<img width="1360" height="695" alt="Admin" src="https://github.com/user-attachments/assets/4b1f88c8-06a4-492e-be61-0a91eb00ec85" />
+
 
 ---
 
